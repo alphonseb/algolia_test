@@ -1,34 +1,50 @@
 <template>
   <div>
-    <header class="header">
-      <h1 class="header-title"><a href="/">Vue InstantSearch v2 starter</a></h1>
-      <p class="header-subtitle">
-        using
-        <a href="https://github.com/algolia/vue-instantsearch">
-          Vue InstantSearch
-        </a>
-      </p>
-    </header>
+    <Header />
 
     <div class="container">
       <ais-instant-search
         :search-client="searchClient"
-        index-name="demo_ecommerce"
+        index-name="dev_FORMULA1"
       >
+        <ais-configure :hits-per-page.camel="18" />
         <div class="search-panel">
           <div class="search-panel__filters">
-            <ais-refinement-list attribute="categories" searchable />
+            <h2>Filter by</h2>
+            <ais-clear-refinements>
+              <span slot="resetLabel">Clear filters</span>
+            </ais-clear-refinements>
+            <div class="search-panel__single-filter">
+              <h3 class="search-panel__subtitle">
+                Season
+              </h3>
+              <ais-refinement-list attribute="season" />
+            </div>
+            <div class="search-panel__single-filter">
+              <h3 class="search-panel__subtitle">
+                Winning Driver
+              </h3>
+              <ais-refinement-list
+                attribute="Results.first.Driver.familyName"
+              />
+            </div>
+            <div class="search-panel__single-filter">
+              <h3 class="search-panel__subtitle">
+                Winning Constructor
+              </h3>
+              <ais-refinement-list attribute="Results.first.Constructor.name" />
+            </div>
           </div>
 
           <div class="search-panel__results">
-            <ais-search-box placeholder="Search here…" class="searchbox" />
-            <ais-hits>
-              <template slot="item" slot-scope="{ item }">
-                <h1><ais-highlight :hit="item" attribute="name" /></h1>
-                <p><ais-highlight :hit="item" attribute="description" /></p>
-              </template>
+            <ais-search-box
+              placeholder="German Grand Prix, Max Verstappen, Lewis..."
+              class="searchbox"
+              :classNames="{ 'ais-SearchBox-input': 'searchbox__input' }"
+            />
+            <ais-hits :classNames="hitsClasses">
+              <RaceItem :race="item" slot="item" slot-scope="{ item }" />
             </ais-hits>
-
             <div class="pagination"><ais-pagination /></div>
           </div>
         </div>
@@ -38,60 +54,75 @@
 </template>
 
 <script>
-import algoliasearch from 'algoliasearch/lite';
-import 'instantsearch.css/themes/algolia-min.css';
+import algoliasearch from "algoliasearch/lite";
+import "instantsearch.css/themes/algolia-min.css";
+
+import RaceItem from "@/components/RaceItem.vue";
+import Header from "@/components/Header.vue";
 
 export default {
   data() {
     return {
       searchClient: algoliasearch(
-        'B1G2GM9NG0',
-        'aadef574be1f9252bb48d4ea09b5cfe5'
-      ),
+        "HD5GJZDE5L",
+        "23a954bbceb8011b7c0cd562c5c63f09"
+      )
     };
   },
+
+  computed: {
+    hitsClasses() {
+      return {
+        "ais-Hits-item": "search-panel__hit"
+      };
+    }
+  },
+
+  components: {
+    RaceItem,
+    Header
+  }
 };
 </script>
 
-<style>
+<style lang="scss">
+:root {
+  --formula-red: #e10600;
+}
+
+@font-face {
+  font-family: "Formula1-Bold";
+  src: url("~@/assets/fonts/Formula1-Bold.otf") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Formula1-Regular";
+  src: url("~@/assets/fonts/Formula1-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body,
-h1 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  min-height: 50px;
-  padding: 0.5rem 1rem;
-  background-image: linear-gradient(to right, #4dba87, #2f9088);
-  color: #fff;
-  margin-bottom: 1rem;
-}
-
-.header a {
-  color: #fff;
-  text-decoration: none;
-}
-
-.header-title {
-  font-size: 1.2rem;
-  font-weight: normal;
-}
-
-.header-title::after {
-  content: ' ▸ ';
-  padding: 0 0.5rem;
-}
-
-.header-subtitle {
-  font-size: 1.2rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 .container {
@@ -102,19 +133,71 @@ body {
 
 .search-panel {
   display: flex;
-}
 
-.search-panel__filters {
-  flex: 1;
-  margin-right: 1em;
-}
+  &__filters {
+    flex: 1;
+    margin-right: 1em;
+  }
 
-.search-panel__results {
-  flex: 3;
+  &__subtitle {
+    font-family: "Formula1-Regular", sans-serif;
+  }
+
+  &__results {
+    flex: 3;
+  }
+
+  &__hit {
+    padding: 0;
+    border-radius: 8px;
+    border: none;
+    transition: transform 0.2s ease-in-out;
+    position: relative;
+    width: calc(100% / 3 - 1rem);
+    min-width: 250px;
+
+    &:hover {
+      transform: translateY(-5px);
+
+      &::before {
+        transform: scale(1);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+      transition-duration: 0.1s;
+
+      &::before {
+        transform: scale(0.65);
+      }
+    }
+
+    &::before {
+      content: "";
+      background: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 5;
+      left: 0;
+      top: 0;
+      box-shadow: 0 10px 10px 0 #e3e5ec;
+      transform: scale(0.65);
+      transform-origin: 50% 50%;
+      transition: transform 0.2s ease-in-out;
+    }
+  }
 }
 
 .searchbox {
   margin-bottom: 2rem;
+
+  &__input {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 32px;
+  }
 }
 
 .pagination {
