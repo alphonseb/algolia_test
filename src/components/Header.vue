@@ -25,6 +25,10 @@ export default {
     font-size: 3rem;
     font-family: "Formula1-Bold", sans-serif;
     margin-left: 24px;
+
+    @media screen and (max-width: 600px) {
+      font-size: 2rem;
+    }
   }
 }
 </style>
